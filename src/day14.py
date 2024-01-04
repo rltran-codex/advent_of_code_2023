@@ -61,6 +61,10 @@ class AutoCycle:
         return pattern
     
     def determine_load(self, num):
+        """
+        Recusive method that checks if detects a loop recuring
+        and checks if the memory has had that pattern before.
+        """
         # base case
         if (num == 0):
             return calculate_load(self.patttern)
