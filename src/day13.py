@@ -33,10 +33,7 @@ def transpose_pattern(pattern: list):
     Takes the pattern and transposes
     the pattern to process evaluating the columns.
     """
-    def to_string(chars: list):
-        return ''.join(chars)
-
-    return list(map(to_string, zip(*[list(r) for r in pattern])))
+    return list(map("".join, zip(*[list(r) for r in pattern])))
 
 
 def check_mirror_part1(pattern: list):
