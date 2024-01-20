@@ -1,5 +1,6 @@
 # advent of code puzzle inputs
 resources/
+out/
 
 .vscode
 node_modules/
