@@ -78,6 +78,7 @@ public class day7 {
   }
 
   public static void processWinningCalculations(HashMap<HAND_TYPE, ArrayList<CamelCardHand>> hand_type_map) {
+    long start = System.nanoTime();
     // flatten the hashmap into an array that resembles the ranking of each hand
     ArrayList<CamelCardHand> rank = new ArrayList<>();
     for (HAND_TYPE h : HAND_TYPE.values()) {
@@ -98,7 +99,11 @@ public class day7 {
       // Uncomment below to list all ranks and hand info
       // System.out.printf("{Rank = %5d} : {Cards = %-20s} : {Bid = %5s} : {Type = %15s} : {Winnings = %8d}\n", rank_num, Arrays.toString(e.cards_encoded), e.bid_amt, e.hand_type, e.bid_amt * rank_num);
     }
+    long end = System.nanoTime();
+    double diff = (end - start) * 1e-6;
+    String time = String.format("Time: %.4f ms", diff);
     System.out.printf("Total Winnings: %d\n", winnings);
+    System.out.println(time);
   }
   public static void main(String[] args) {
     HashMap<HAND_TYPE, ArrayList<CamelCardHand>> p1_rank = partOne();

@@ -28,6 +28,7 @@ Author: Richard Tran
 Status: Completed
 """
 import re
+import time
 
 INPUT_FILE = "./resources/day3_input.txt"
 sum_1 = 0
@@ -72,7 +73,7 @@ if __name__ == "__main__":
     # read each line -> list of characters -> add to engine_schematic (2D array)
     engine_schematic = [list(line.strip()) for line in file]
 
-  
+  start = time.time()
   # iterate through 2D array
   for row, line in enumerate(engine_schematic):
     idx = 0
@@ -107,5 +108,6 @@ if __name__ == "__main__":
   # find the sum of all valid part numbers
   for num in part_numbers:
     sum_1 += num
-
+  end = time.time()
   print(f"Part I  answer: {sum_1}")
+  print(f"Time: {(end - start) * 10**3} ms")

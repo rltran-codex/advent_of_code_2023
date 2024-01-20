@@ -1,3 +1,4 @@
+import time
 import day4_part1 as day4
 
 day4.load_file()  # load the file and populate day4.colorful_cards
@@ -34,6 +35,7 @@ if __name__ == "__main__":
     sum_2 = 0
 
     # initially the number of cards we own is 0. Thus each iteration we add one since its in the puzzle input
+    start = time.time_ns()
     for card_num in scratch_cards.keys():
         cards_owned[card_num] += 1
         num_of_copies = cards_owned[card_num]
@@ -41,5 +43,7 @@ if __name__ == "__main__":
                     ['winning_numbers'], card_num, num_of_copies)
 
         sum_2 += cards_owned[card_num]
-
+    end = time.time_ns()
     print(f"Part II answer: {sum_2}")
+    print(f"Time: {(end - start)} ns")
+

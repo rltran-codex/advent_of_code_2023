@@ -81,11 +81,16 @@ public class day6_part1 {
   public static void main(String[] args) {
     open_file();
     int multiplied_sum = 1;
+    long start = System.nanoTime();
     for (BoatRace br : races) {
       multiplied_sum *= br.findNumberOfOptions();
     }
-
+    long end = System.nanoTime();
+    double diff = (end - start) * 1e-6;
     String msg = String.format("Part I answer: %d", multiplied_sum);
+    String time = String.format("Time: %.4f ms", diff);
     System.out.println(msg);
+    System.out.println(time);
+
   }
 }

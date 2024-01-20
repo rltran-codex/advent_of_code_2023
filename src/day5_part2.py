@@ -12,6 +12,7 @@ Author: Richard Tran
 Status: Completed
 """
 
+import time
 from day5_part1 import INPUT_FILE, extract_conversion_mapping
 import sys
 
@@ -230,6 +231,7 @@ def find_lowest_location(seed_population: list) -> int:
 
 
 if __name__ == "__main__":
+    start = time.time_ns()
     # initialize by opening file and extracting seed numbers and conversion maps
     seed_objects = extract_seed_numbers()
     c_map = extract_conversion_mapping()
@@ -238,5 +240,7 @@ if __name__ == "__main__":
         c_map[i].sort()
         pass
 
+    end = time.time_ns()
     lowest_loc = find_lowest_location(seed_objects)
     print(f"Part II answer: {lowest_loc}")
+    print(f"Time: {(end - start)} ns")

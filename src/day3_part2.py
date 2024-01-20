@@ -38,6 +38,7 @@ Reference: https://adventofcode.com/2023/day/3
 Author: Richard Tran
 Status: Completed
 """
+import time
 from day3_part1 import is_number, INPUT_FILE
 from functools import reduce
 import re
@@ -251,8 +252,11 @@ if __name__ == "__main__":
         # using a "bubble", check northern and southern part of the bubble,
         # then check left and right
         # if not found, then the symbol is not near two numbers
+    start = time.time()
     for row, list in enumerate(schar_indices):
         for col in list:
             sum_2 += calculate_gear_ratio((row, col))
-
+    end = time.time()
     print(f"Part II answer: {sum_2}")
+    print(f"Time: {(end - start) * 10**3} ms")
+

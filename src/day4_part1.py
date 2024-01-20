@@ -1,4 +1,5 @@
 import re
+import time
 
 INPUT_FILE = './resources/day4_input.txt'
 """
@@ -69,6 +70,9 @@ def load_file():
 if __name__ == "__main__":
     sum_1 = 0
     load_file()
+    start = time.time_ns()
     sum_1 = calculate_cards_total()
-
+    end = time.time_ns()
+    
     print(f"Part I answer: {sum_1}")
+    print(f"Time: {(end - start)} ns")

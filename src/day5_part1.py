@@ -26,6 +26,7 @@ Author: Richard Tran
 Status: Completed
 """
 from sys import maxsize
+import time
 
 INPUT_FILE = "./resources/day5_input.txt"
 seed_map = {}
@@ -158,6 +159,7 @@ def extract_conversion_mapping():
         return conversion_map
 
 if __name__ == "__main__":
+    start = time.time_ns()
     seed_map = extract_seed_numbers()
     conversion_map = extract_conversion_mapping()
     for seed in seed_map.keys():
@@ -188,6 +190,9 @@ if __name__ == "__main__":
         if loc_num < lowest_loc:
             lowest_loc = loc_num
             lowest_seed = seed
+    end = time.time_ns()
     
     print(f"Seed Number: {lowest_seed}")
     print(f"Location Number:{lowest_loc}")
+    print(f"Time: {(end - start) * 10**-6} ms")
+

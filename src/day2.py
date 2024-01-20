@@ -42,6 +42,7 @@ Status: Completed
 """
 import re
 import sys
+import time
 
 INPUT_FILE = './resources/day2_input.txt'
 
@@ -54,9 +55,6 @@ NUM_CUBE_THRESHOLD = {
     'blue': 14,
     'green': 13
 }
-
-sum_1 = 0
-sum_2 = 0
 
 
 class Game_Record:
@@ -109,14 +107,25 @@ class Game_Record:
 
 
 if __name__ == "__main__":
+    sum_1 = 0
+    sum_2 = 0
+    
     with open(INPUT_FILE, 'r') as file:
         game_records = [input_line for input_line in file]
+        start = time.time()
         for game in game_records:
             g = Game_Record(game)
             if g.valid_config:
                 sum_1 += g.game_id
-
-            sum_2 += g.cubed_min
-
+        end = time.time()
         print(f"Part I  answer: {sum_1}")
+        print(f"Time: {(end - start) * 10**3} ms")
+
+        start = time.time()
+        for game in game_records:
+            g = Game_Record(game)
+            sum_2 += g.cubed_min
+        end = time.time()
+
         print(f"Part II answer: {sum_2}")
+        print(f"Time: {(end - start) * 10**3} ms")

@@ -150,7 +150,17 @@ public class day8 {
 
   public static void main(String[] args) {
     init();
+    long start = System.nanoTime();
+    long end = System.nanoTime();
     partOne();
+    double diff = (end - start) * 1e-6;
+    String time = String.format("Time: %.4f ms", diff);
+    System.out.println(time);
+    start = System.nanoTime();
     partTwo();
+    end = System.nanoTime();
+    diff = (end - start) * 1e-6;
+    time = String.format("Time: %.4f ms", diff);
+    System.out.println(time);
   }
 }

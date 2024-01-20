@@ -21,6 +21,7 @@ Author: Richard Tran
 Status: Completed
 """
 import re
+import time
 
 INPUT_FILE = './resources/day1_input.txt'
 
@@ -28,6 +29,7 @@ sum = 0
 calibration_values = []
 
 if __name__ == "__main__":
+    start = time.time()
     with open(INPUT_FILE, 'r') as f:  # open input file for processing
         content = [line.strip() for line in f]  # load each line into an array
 
@@ -41,4 +43,6 @@ if __name__ == "__main__":
     for c_val in calibration_values:
         sum += c_val
 
+    end = time.time()
     print(f"Part I answer: {sum}")
+    print(f"Time: {(end - start) * 10**3} ms")

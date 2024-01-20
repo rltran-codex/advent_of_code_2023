@@ -79,10 +79,15 @@ public class day6_part2 {
     open_file();
 
     long sum = 0;
+    long start = System.nanoTime();
     for (BoatRace br : races) {
       sum += br.findOptimized();
       // sum = br.findNumberOfOptions();  // method was too slow for me... could be improved
     }
-    System.out.printf("Part II answer: %d", sum);
+    long end = System.nanoTime();
+    double diff = (end - start) * 1e-6;
+    String time = String.format("Time: %.4f ms", diff);
+    System.out.printf("Part II answer: %d\n", sum);
+    System.out.println(time);
   }
 }
