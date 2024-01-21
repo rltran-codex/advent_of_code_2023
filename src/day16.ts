@@ -72,22 +72,22 @@ function handleVerticalSplit(
 
   let [row, col] = direction_handler(BeamDirection.DOWN, coordinates);
   // add the left
-  stack.push([
+  stack.push(
     {
-      dir:BeamDirection.DOWN,
       row:row,
-      col:col
+      col:col,
+      dir:BeamDirection.DOWN
     }
-  ]);
+  );
   // add the right
   [row, col] = direction_handler(BeamDirection.UP, coordinates);
-  stack.push([
+  stack.push(
     {
-      dir:BeamDirection.UP,
       row:row,
-      col:col
+      col:col,
+      dir:BeamDirection.UP
     }
-  ]);
+  );
 }
 
 function handleHorizontalSplit(
@@ -106,22 +106,22 @@ function handleHorizontalSplit(
 
   let [row, col] = direction_handler(BeamDirection.RIGHT, coordinates);
   // add the left
-  stack.push([
+  stack.push(
     {
       dir:BeamDirection.RIGHT,
       row:row,
       col:col
     }
-  ]);
+  );
   // add the right
   [row, col] = direction_handler(BeamDirection.LEFT, coordinates);
-  stack.push([
+  stack.push(
     {
       dir:BeamDirection.LEFT,
       row:row,
       col:col
     }
-  ]);
+  );
 }
 
 function handleBackSlash(
