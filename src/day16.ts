@@ -11,17 +11,14 @@ enum beam_direction {
   LEFT,
 }
 
-function energizePlatform(data: string[][]) {
+function energizePlatform(data: string[][], stepStack : any[]) {
   const rows = data.length;
   const cols = data[0].length;
 
   let e_platform: string[][] = Array.from({ length: rows }, () =>
     Array.from({ length: cols }, () => ".")
   );
-  let stepStack = new Array();
-
   // deploy beam and evaluate the number of energized tiles
-  stepStack.push([beam_direction.RIGHT, [0, 0]]);
   while (stepStack.length != 0) {
     let curr_loc = stepStack.pop();
     let curr_dir = curr_loc.shift();
@@ -50,10 +47,9 @@ function energizePlatform(data: string[][]) {
     e_platform[row][col] = "#";
   }
 
-  console.log(
-    "Total number of energized tiles: " +
-      e_platform.flat().filter((i) => i === "#").length
-  );
+  let result = e_platform.flat().filter((i) => i === "#").length;
+  // console.log(`Total number of energized tiles: ${result}`);
+  return result;
 }
 
 function handleVerticalSplit(
@@ -184,7 +180,67 @@ function direction_handler(direction: beam_direction, coordinates: number[]) {
   return [row, col];
 }
 
-const start = performance.now();
-energizePlatform(data);
-const end = performance.now();
+function findMaxEnergy(data : string[][]) {
+  type Coordinates = [number, number];
+  let edge_points = new Array();
+  const rows = data.length;
+  const cols = data[0].length;
+
+  // upper left
+  edge_points.push([beam_direction.RIGHT, [0,0]]);
+  edge_points.push([beam_direction.DOWN, [0, 0]]);
+
+  // upper right
+  edge_points.push([beam_direction.LEFT, [0, cols - 1]]);
+  edge_points.push([beam_direction.DOWN, [0, cols - 1]]);
+
+  // lower left
+  edge_points.push([beam_direction.UP, [rows - 1, 0]]);
+  edge_points.push([beam_direction.RIGHT, [rows - 1, 0]]);
+
+  // lower right
+  edge_points.push([beam_direction.UP, [rows - 1, cols - 1]]);
+  edge_points.push([beam_direction.LEFT, [rows - 1, cols - 1]]);
+
+  // upper and lower most edges
+  for (let col = 1; col < cols - 1; col++) {
+    edge_points.push([beam_direction.DOWN, [0, col]]);
+    edge_points.push([beam_direction.UP, [rows - 1, col]]);
+  }
+
+  // right and left most edges
+  for (let row = 1; row < rows - 1; row++) {
+    edge_points.push([beam_direction.RIGHT, [row, 0]]);
+    edge_points.push([beam_direction.LEFT, [row, cols - 1]]);
+  }
+
+  var max = Number.MIN_SAFE_INTEGER;
+  edge_points.forEach((value) => {
+    let stepStack = new Array();
+    stepStack.push(value);
+    let r = energizePlatform(data, stepStack)
+    if (r > max) {
+      max = r;
+    }
+  });
+
+  return max;
+}
+
+let start = performance.now();
+let stepStack = new Array();
+stepStack.push([beam_direction.RIGHT, [0, 0]]);
+const result_1 = energizePlatform(data, stepStack);
+let end = performance.now();
+console.log(`Part 1, energized tiles: ${result_1}`);
+console.log(`Time: ${(end - start)} ms`);
+
+// for part two, its a little more time consuming, 
+// but lets start with the corners first
+// since those can be evaluated twice
+
+start = performance.now();
+let result_2 = findMaxEnergy(data);
+end = performance.now();
+console.log(`Part 2, energized tiles: ${result_2}`);
 console.log(`Time: ${(end - start)} ms`);
