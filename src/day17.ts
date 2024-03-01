@@ -1,12 +1,102 @@
 import * as fs from "fs";
-let nodes: Node[][] = [];
-let rows: number = undefined;
-let cols: number = undefined;
+import { PriorityQueue } from "./util/PriorityQueue";
+
 /**
- * Open puzzle input and process it into a Graph data structure.
+ * Notes for me:
+ * A potential way to do this is to use dijkstra's algorithm to traverse the shortest path.
+ * However, the issue with this is that the crucible can move in one direction without having the restrictions.
+ * If we add a way to keep track of which direction the crucible is heading, and if we reach the limit of 3 steps in a
+ * single direction, we can recalculate the dijkstra's path for each direction to find the optimized movement.
  *
- * @returns nodeLayout - Graph data structure of all location points.
+ * One theory we can use is that the algorithm will calculate the minimum distance heat from the source to the destination.
+ * So if we traverse the first iteration of calculation then the crucible is forced to change direction,  we can change the
+ * direction and recalculate the least amount of heat loss.
+ *
+ * Another theory is that we can have a counter that checks the current direction number, if stepDirection < 3, there are potentially
+ * numberofAdj - 1 (visited node). If stepDirection == 3, then there are potentially only numberOfAdj - 1 (visited node) - 1 (curr direction)
  */
+
+let nodeList: Node[][] = []; // list of all nodes in graph
+let rows: number;
+let cols: number;
+
+function partOne() {
+  nodeList = buildNodes();
+  dijkstraAlgo(nodeList[0][0], nodeList[rows - 1][cols - 1]);
+}
+
+function dijkstraAlgo(srcNode: Node, destNode: Node) {
+  function drawMap(dir: Direction) {
+    switch (dir) {
+      case Direction.UP:
+        return "^"
+      case Direction.DOWN:
+        return "v"
+      case Direction.LEFT:
+        return "<"
+      case Direction.RIGHT:
+        return ">"    
+      default:
+        break;
+    }
+  }
+  const pq: PriorityQueue<NodeInfo> = new PriorityQueue<NodeInfo>(
+    (a: NodeInfo, b: NodeInfo) => {
+      return a.minHL > b.minHL;
+    }
+  );
+
+  const crucibleMap: string[][] = Array.from({ length: rows }, () => Array.from({ length: cols }, () => undefined));
+
+  const heatLossMap = new Map<Node, number>();
+  nodeList.flat().forEach((v) => {
+    v.visited = false; // set all nodes to unvisited
+    // set all nodes that are not srcNode to infinity
+    heatLossMap.set(v, v === srcNode ? 0 : Number.POSITIVE_INFINITY);
+  });
+
+  pq.push({ node: srcNode, minHL: 0, dir: undefined, stepCnt: 0 });
+
+  while (!pq.isEmpty()) {
+    const {
+      // pop the MinHeap queue
+      node: currNode,
+      dir: currDir,
+      stepCnt: s,
+    }: NodeInfo = pq.pop();
+
+    if (currNode.visited) {
+      continue;
+    }
+
+    crucibleMap[currNode.location[0]][currNode.location[1]] = drawMap(currDir);
+    currNode.visited = true;
+    for (const [dir, adjNode] of Array.from(currNode.adjList.entries())) {
+      if (!adjNode.visited) {
+        if (dir === currDir && s === 3) {
+          continue;
+        }
+  
+        const calcHL: number = heatLossMap.get(currNode) + adjNode.heatValue; // calculate tentative heat loss
+        // if new tentative heat loss is less than current value, update and queue
+        if (calcHL < heatLossMap.get(adjNode)) {
+          heatLossMap.set(adjNode, calcHL);
+          pq.push({
+            node: adjNode,
+            minHL: calcHL,
+            dir: dir,
+            stepCnt: dir === currDir || currDir === undefined ? s + 1 : 1,
+          });
+        }
+      }
+    }
+
+    console.log('');
+  }
+
+  console.log(heatLossMap.get(destNode));
+}
+
 function buildNodes(): Node[][] {
   const lines = fs.readFileSync("./resources/sample_input/day17.txt", "utf-8");
   // const lines = fs.readFileSync("./resources/day17_input.txt", "utf-8");
@@ -53,142 +143,71 @@ function buildNodes(): Node[][] {
       right = nodeLayout[row][col + 1]; // connect right node
     }
 
-    nodeLayout[row][col].setNeighbors([up, down, left, right]);
+    nodeLayout[row][col].setAdjList(
+      new Map<Direction, Node>([
+        [Direction.UP, up],
+        [Direction.DOWN, down],
+        [Direction.LEFT, left],
+        [Direction.RIGHT, right],
+      ])
+    );
   });
 
   return nodeLayout;
 }
 
-/**
- * Could use Dijkstra's shortest path algorithm.
- * Keep in mind that the crucible has moving conditions:
- * - Direction movement cannot exceed 3
- * - Must make a right to reset movement counter
- * - Cannot revisit a tile (node)
- * - Goal is to move with the least amount of heat loss
- */
-
-/**
+/*
  * Graph Data Structure
  */
-interface NodeInterface {
-  val: number;
-  adj: NodeInterface[];
-  loc: number[];
-
-  getAdjList(): NodeInterface[];
+/**
+ * Direction enum
+ *  - UP    [row - 1, col]
+ *  - DOWN  [row + 1, col]
+ *  - LEFT  [row, col - 1]
+ *  - RIGHT [row, col + 1]
+ */
+enum Direction {
+  UP,
+  DOWN,
+  LEFT,
+  RIGHT,
 }
 
-class Node implements NodeInterface {
-  val: number;
-  adj: NodeInterface[];
-  loc: number[];
+type NodeInfo = {
+  node: Node;
+  minHL: number;
+  dir: Direction;
+  stepCnt: number;
+}
 
-  constructor(val: number, loc: number[]) {
-    this.val = val;
-    this.loc = loc;
-    this.adj = [];
+class Node {
+  adjList: Map<Direction, Node>;
+  location: number[];
+  heatValue: number;
+  visited: boolean;
+
+  constructor(heatValue: number, location: number[]) {
+    this.heatValue = heatValue;
+    this.location = location;
+    this.adjList = new Map<Direction, Node>();
+    this.visited = false;
   }
 
-  getAdjList = (): NodeInterface[] => {
-    return this.adj;
-  };
-
-  setNeighbors = (adjList: NodeInterface[]): undefined => {
-    if (adjList.length === 0) {
-      return;
+  getAdjList = (): Map<Direction, Node> => {
+    if (this.adjList === undefined) {
+      throw new Error(`Node adjList at ${this.location} is undefined.`);
     }
 
-    // filter out any undefined elements from the list
-    this.adj = adjList.filter((node) => node !== undefined);
-  };
-}
-
-/**
- * Dijsktra's algorithm to find the path
- * that generates the least amount of heat
- * loss to the cruicble.
- *
- * @param s - crucible starting point.
- *
- * references:
- * https://www.digitalocean.com/community/tutorials/min-heap-binary-tree
- * https://www.geeksforgeeks.org/dijkstras-shortest-path-algorithm-greedy-algo-7/
- */
-function dijkstraAlgo(srcNode: NodeInterface, destNode: NodeInterface) {
-  type NodeInfo = {
-    heatLost: number;
-    node: NodeInterface;
-    prevNode : NodeInterface;
+    return this.adjList;
   };
 
-  const dijkstraPath : NodeInterface[][] = Array.from({ length: rows }, () =>
-    Array.from({ length: cols }, () => null)
-  ); // path to take
-  
-  const queue: NodeInfo[] = []; // "priority queue" (change to minheap for greater performance)
-  const heatLossMap = new Map<NodeInterface, number>(); // data object to store heat loss
-  const visited = new Set<NodeInterface>(); // visited nodes
-
-  nodes.flat().forEach((value) => {
-    /**
-     * set source node's heat loss value to 0 and
-     * set all other nodes' heat loss values to "infinity"
-     */
-    heatLossMap.set(value, value === srcNode ? 0 : Number.POSITIVE_INFINITY);
-    const [row, col] = value.loc;
-    dijkstraPath[row][col] = new Node(value.val, [row, col]); // create empty node with just val and location
-  });
-  
-  queue.push({ heatLost: 0, node: srcNode , prevNode: null});
-
-  while (queue.length !== 0) {
-    // pop first node in queue
-    const { node: currNode, heatLost: h, prevNode: prevNode } = queue.shift();
-    if (visited.has(currNode)) {
-      continue;
-    }
-
-    visited.add(currNode); // mark node as visited
-    // for each adjacent node that hasn't been visited, calculate heat loss of adjacent nodes
-    currNode.getAdjList().forEach((e: NodeInterface) => {
-      if (!visited.has(e)) {
-        const calculateHeatLoss: number = heatLossMap.get(currNode) + e.val;
-        let currHeatLoss: number = heatLossMap.get(e);
-        
-        if (calculateHeatLoss < currHeatLoss) {
-          heatLossMap.set(e, calculateHeatLoss);
-          queue.push({ heatLost: calculateHeatLoss, node: e , prevNode: currNode});
-        }
+  setAdjList = (adjList: Map<Direction, Node>) => {
+    adjList.forEach((v, k) => {
+      if (v !== undefined) {
+        this.adjList.set(k, v);
       }
     });
-    queue.sort((a, b) => a.heatLost - b.heatLost); // queue the adj node with the smallest heat loss
-    
-    const [row, col] = currNode.loc;
-    const nNode = dijkstraPath[row][col];
-    if (prevNode !== null) {
-      const pNode = dijkstraPath[prevNode.loc[0]][prevNode.loc[1]];
-
-      // connect nodes with edge
-      nNode.adj.push(pNode);
-      pNode.adj.push(nNode);
-    }
-  }
-
-  console.log("hi");
-}
-
-function partOne() {
-  let start: number,
-    end: number = undefined;
-  start = performance.now();
-  nodes = buildNodes();
-  end = performance.now();
-  console.log(`Time to build graph: ${end - start} ms`);
-  start = performance.now();
-  dijkstraAlgo(nodes[0][0], nodes[rows - 1][cols - 1]);
-  end = performance.now();
-  console.log(`Time to execute Dijkstra's Shortest Path: ${end - start} ms`);
+  };
 }
 
 partOne();
